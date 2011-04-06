@@ -4,7 +4,6 @@ package cone.arguments
  * @author Chris Turner
  */
 case class ArgumentAccumulator(processedArguments: List[Argument],
-                               expectationArgument: Option[Argument],
                                errors: List[ArgumentError],
                                argumentWithExpectations: Option[Argument],
                                expectationsRemaining: List[SimpleRule]) {
@@ -37,5 +36,5 @@ case class ArgumentAccumulator(processedArguments: List[Argument],
 
 object ArgumentAccumulator {
 
-  def create = new ArgumentAccumulator(List(), None, List(), None, List())
+  def create = new ArgumentAccumulator(List(), List(), None, List())
 }

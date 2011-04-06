@@ -10,7 +10,11 @@ class ArgumentsProcessor(specification: ArgumentSpecification) {
   private lazy val FlagPattern = """^\-([a-zA-Z0-9]+)$""".r
 
 
-  def processArguments(args: Array[String]) = args.toList.foldLeft(ArgumentAccumulator.create)(processArgument)
+  def processArguments(args: Array[String]) = {
+    val acc = args.toList.foldLeft(ArgumentAccumulator.create)(processArgument)
+    if ( acc.isExpecting ) acc + InsufficientFlagParameters(acc.argumentWithExpectations.get)
+    else acc
+  }
 
   private def processArgument(acc: ArgumentAccumulator, arg: String) =
     if ( acc.isExpecting ) processExpectation(acc, arg)
