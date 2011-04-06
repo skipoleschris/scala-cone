@@ -1,0 +1,12 @@
+- TO DO LIST -
+
+* Simple arguments with expectations
+* Repeating simple arguments (or groups)
+* Custom error messages when rules fail to match
+
+* Move this into a proper project
+* Acceptance tests
+* Unit tests
+* Monadic pattern for accumulator?
+* Monadic pattern for returned results
+

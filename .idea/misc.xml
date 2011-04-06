@@ -55,9 +55,6 @@
     <option name="SKIP_IMPORT_STATEMENTS" value="false" />
   </component>
   <component name="IdProvider" IDEtalkID="D0C49EBCAAFBB7890769363413D46516" />
-  <component name="JavacSettings">
-    <option name="MAXIMUM_HEAP_SIZE" value="256" />
-  </component>
   <component name="JavadocGenerationManager">
     <option name="OUTPUT_DIRECTORY" />
     <option name="OPTION_SCOPE" value="protected" />
