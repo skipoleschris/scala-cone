@@ -36,6 +36,10 @@ class FlagArgumentsSpec extends Specification { def is =
     "detect the h flag"                                        ! detectFlag("-h -a")^
     "record the value '-a' for the h flag"                     ! recordValue("-h -a")^
                                                                endp^
+  "The arguments '-p 12345' should"                            ^
+    "detect the p flag"                                        ! detectFlag("-p 12345")^
+    "record the value '12345' for the p flag"                  ! recordValue("-p 12345")^
+                                                               endp^
   "The arguments '-h' should"                                  ^
     "report the h flag as an error"                            ! detectError("-h", InsufficientFlagParameters(FlagArgument('h')))^
                                                                endp^
@@ -53,6 +57,9 @@ class FlagArgumentsSpec extends Specification { def is =
                                                                 endp^
   "The arguments '-h localhost -h remote' should"              ^
     "report the h flag as an error"                            ! detectError("-h localhost -h remote", DuplicateArgument(FlagArgument('h', List(SimpleArgument("remote")))))^
+                                                               endp^
+  "The arguments '-p bad' should"                              ^
+    "report the p flag as an error"                            ! detectError("-p bad", InvalidFlagParameter(FlagArgument('p')))^
                                                                end
 
   val Detect = """^detect the ([a-zA-Z0-9]) flag""".r
@@ -91,7 +98,7 @@ class FlagArgumentsSpec extends Specification { def is =
 
   def buildSpecification = ArgumentSpecification(
     List(),
-    List(FlagRule('a'), FlagRule('b'), FlagRule('h', List(SimpleRule())), FlagRule('p', List(SimpleRule())),
+    List(FlagRule('a'), FlagRule('b'), FlagRule('h', List(SimpleRule())), FlagRule('p', List(SimpleRule("[0-9]+"))),
          FlagRule('t', List(SimpleRule(), SimpleRule(), SimpleRule()))),
     List());
 

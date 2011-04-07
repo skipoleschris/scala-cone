@@ -9,7 +9,6 @@
 
 * Acceptance tests
     * Simple argument tests
-    * Validation of flag parameters against patterns
 * Unit tests
 * Monadic pattern for accumulator?
 * Monadic pattern for returned results
