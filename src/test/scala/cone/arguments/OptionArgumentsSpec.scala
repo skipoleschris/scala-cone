@@ -36,6 +36,12 @@ class OptionArgumentsSpec extends Specification { def is =
                                                                endp^
   "The arguments '--unknown=value' should"                     ^
     "report the --unknown argument as an error"                ! detectError("--unknown=value", UnknownOption(OptionArgument("unknown", Some("value"))))^
+                                                               endp^
+  "The arguments '--help --help' should"                       ^
+    "report the help option as an error"                       ! detectError("--help --help", DuplicateArgument(OptionArgument("help", None)))^
+                                                               endp^
+  "The arguments '--host=localhost --host=remote' should"      ^
+    "report the host option as an error"                       ! detectError("--host=localhost --host=remote", DuplicateArgument(OptionArgument("host", Some("remote"))))^
                                                                end
 
   val Detect = """^detect the (.*) option$""".r

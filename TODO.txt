@@ -1,11 +1,14 @@
 - TO DO LIST -
 
-* Simple arguments with expectations
+* Simple arguments with static expectations
+* Simple arguments with dynamic expectations based on contents
 * Repeating simple arguments (or groups)
+* Type conversions
 * Custom error messages when rules fail to match
+* Combined flag/option specification
 
-* Move this into a proper project
 * Acceptance tests
+    * Simple argument tests
 * Unit tests
 * Monadic pattern for accumulator?
 * Monadic pattern for returned results
