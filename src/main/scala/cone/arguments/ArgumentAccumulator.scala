@@ -10,7 +10,10 @@ case class ArgumentAccumulator(processedArguments: List[Argument],
 
   def +(arg: Argument) =
     if ( isExpecting ) addExpected(arg)
-    else copy(processedArguments = arg :: processedArguments)
+    else checkForDuplicateAndApply(arg)(addProcessedArgument)
+
+  private def addProcessedArgument(a: Argument, acc: ArgumentAccumulator) =
+      acc.copy(processedArguments = a :: acc.processedArguments)
 
   def +(error: ArgumentError) = copy(errors = error :: errors,
                                      argumentWithExpectations = None,
@@ -22,7 +25,7 @@ case class ArgumentAccumulator(processedArguments: List[Argument],
 
   def isExpecting = argumentWithExpectations != None
 
-  def addExpected(arg: Argument) = expectationsRemaining match {
+  private def addExpected(arg: Argument) = expectationsRemaining match {
     case Nil => sys.error("Unexpected expectation argument processed when none was expected")
     case x :: xs if ( xs == Nil ) => copy(argumentWithExpectations.get + arg :: processedArguments,
                                           argumentWithExpectations = None,
@@ -30,6 +33,14 @@ case class ArgumentAccumulator(processedArguments: List[Argument],
     case _ => copy(argumentWithExpectations = argumentWithExpectations.map(_ + arg),
                    expectationsRemaining = expectationsRemaining.tail)
   }
+
+  private def checkForDuplicateAndApply(arg: Argument)(f: (Argument, ArgumentAccumulator) => ArgumentAccumulator) =
+    processedArguments.find(isDuplicate(arg)) match {
+      case None => f(arg, this)
+      case _ => copy(errors = DuplicateArgument(arg) :: errors)
+    }
+
+  private def isDuplicate(arg: Argument)(checkWith: Argument) = arg.isDuplicateOf(checkWith)
 
   def noOfSimpleArguments = processedArguments.filter(_.isInstanceOf[SimpleArgument]).length
 }
