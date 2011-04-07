@@ -6,7 +6,6 @@
 * Type conversions
 * Custom error messages when rules fail to match
 * Combined flag/option specification
-* Detection of duplicate detection on flags and options
 
 * Acceptance tests
     * Simple argument tests

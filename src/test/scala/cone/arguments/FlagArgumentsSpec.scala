@@ -44,6 +44,15 @@ class FlagArgumentsSpec extends Specification { def is =
                                                                endp^
   "The arguments '-g' should"                                  ^
     "report the g flag as an error"                            ! detectError("-g", UnknownFlag(FlagArgument('g')))^
+                                                               endp^
+  "The arguments '-a -a' should"                               ^
+    "report the a flag as an error"                            ! detectError("-a -a", DuplicateArgument(FlagArgument('a')))^
+                                                               endp^
+  "The arguments '-aa' should"                                 ^
+    "report the a flag as an error"                            ! detectError("-aa", DuplicateArgument(FlagArgument('a')))^
+                                                                endp^
+  "The arguments '-h localhost -h remote' should"              ^
+    "report the h flag as an error"                            ! detectError("-h localhost -h remote", DuplicateArgument(FlagArgument('h', List(SimpleArgument("remote")))))^
                                                                end
 
   val Detect = """^detect the ([a-zA-Z0-9]) flag""".r

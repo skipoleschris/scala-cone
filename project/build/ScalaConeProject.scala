@@ -10,10 +10,10 @@ class ScalaConeProject(info: ProjectInfo) extends DefaultProject(info) with Scct
   // Compile Dependencies
   val slf4jApi = "org.slf4j" % "slf4j-api" % "1.6.1" % "compile"
   val logback = "ch.qos.logback" % "logback-classic" % "0.9.28" % "compile"
-  val slf4s = "com.weiglewilczek.slf4s" %% "slf4s" % "1.0.3"
+  val slf4s = "com.weiglewilczek.slf4s" %% "slf4s" % "1.0.4"
 
   // Test dependencies
-  val specs2 = "org.specs2" %% "specs2" % "1.1-SNAPSHOT" % "test"
+  val specs2 = "org.specs2" %% "specs2" % "1.1" % "test"
 
   // Spec2 configuration
   def specs2Framework = new TestFramework("org.specs2.runner.SpecsFramework")

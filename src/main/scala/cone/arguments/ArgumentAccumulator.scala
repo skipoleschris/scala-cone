@@ -27,17 +27,24 @@ case class ArgumentAccumulator(processedArguments: List[Argument],
 
   private def addExpected(arg: Argument) = expectationsRemaining match {
     case Nil => sys.error("Unexpected expectation argument processed when none was expected")
-    case x :: xs if ( xs == Nil ) => copy(argumentWithExpectations.get + arg :: processedArguments,
-                                          argumentWithExpectations = None,
-                                          expectationsRemaining = xs)
+    case x :: xs if ( xs == Nil ) =>
+      checkForDuplicateAndApply(argumentWithExpectations.get + arg)(addCompletedExpectation)
     case _ => copy(argumentWithExpectations = argumentWithExpectations.map(_ + arg),
                    expectationsRemaining = expectationsRemaining.tail)
   }
 
+  private def addCompletedExpectation(a: Argument, acc: ArgumentAccumulator) =
+    acc.copy(processedArguments = a :: acc.processedArguments,
+             argumentWithExpectations = None,
+             expectationsRemaining = List())
+
+
   private def checkForDuplicateAndApply(arg: Argument)(f: (Argument, ArgumentAccumulator) => ArgumentAccumulator) =
     processedArguments.find(isDuplicate(arg)) match {
       case None => f(arg, this)
-      case _ => copy(errors = DuplicateArgument(arg) :: errors)
+      case _ => copy(errors = DuplicateArgument(arg) :: errors,
+                     argumentWithExpectations = None,
+                     expectationsRemaining = List())
     }
 
   private def isDuplicate(arg: Argument)(checkWith: Argument) = arg.isDuplicateOf(checkWith)
