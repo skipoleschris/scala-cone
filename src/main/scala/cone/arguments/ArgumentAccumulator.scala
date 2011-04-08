@@ -25,6 +25,17 @@ case class ArgumentAccumulator(processedArguments: List[Argument],
 
   def isExpecting = argumentWithExpectations != None
 
+  def check(expectedArguments: Int) = {
+    if ( isExpecting ) this + InsufficientFlagParameters(argumentWithExpectations.get)
+    else checkRequiredArguments(expectedArguments)
+  }
+
+  private def checkRequiredArguments(expected: Int) = {
+    val actual = processedArguments.filter(_.isInstanceOf[SimpleArgument]).size
+    if ( actual < expected ) this + InsufficientArguments(expected, actual)
+    else this
+  }
+
   private def addExpected(arg: Argument) = expectationsRemaining match {
     case Nil => sys.error("Unexpected expectation argument processed when none was expected")
     case x :: xs if ( xs == Nil ) =>
