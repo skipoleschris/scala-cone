@@ -7,8 +7,6 @@
 * Custom error messages when rules fail to match
 * Combined flag/option specification
 
-* Acceptance tests
-    * Simple argument tests
 * Unit tests
 * Monadic pattern for accumulator?
 * Monadic pattern for returned results

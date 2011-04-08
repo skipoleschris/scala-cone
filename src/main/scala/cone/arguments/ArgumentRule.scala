@@ -25,7 +25,8 @@ case class OptionRule(name: String,
   }
 }
 
-case class SimpleRule(valuePattern: String = ".+") extends ArgumentRule {
+case class SimpleRule(valuePattern: String = ".+",
+                      mandatory: Boolean = true) extends ArgumentRule {
 
   private lazy val pattern = valuePattern.r
 

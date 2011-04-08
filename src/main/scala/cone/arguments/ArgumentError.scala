@@ -19,3 +19,4 @@ case class MultipleParameterExpectations(arg: Argument) extends ArgumentError
 
 case class NonMatchingArgumentPattern(simple: SimpleArgument, expected: String) extends ArgumentError
 case class TooManyArguments(simple: SimpleArgument) extends ArgumentError
+case class InsufficientArguments(expected: Int, actual: Int) extends ArgumentError
