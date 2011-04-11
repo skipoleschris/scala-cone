@@ -3,7 +3,7 @@ package cone.arguments
 /**
  * @author Chris Turner
  */
-object Arguments {
+private[arguments] object Arguments {
   def result[A](arguments: Seq[A]) = new Result[A](arguments)
   def errors(errors: List[ArgumentError]) = new Errors(errors)
 }
