@@ -60,6 +60,8 @@ case class ArgumentAccumulator(processedArguments: List[Argument],
 
   private def isDuplicate(arg: Argument)(checkWith: Argument) = arg.isDuplicateOf(checkWith)
 
+  def hasErrors = errors.size > 0
+
   def noOfSimpleArguments = processedArguments.filter(_.isInstanceOf[SimpleArgument]).length
 }
 

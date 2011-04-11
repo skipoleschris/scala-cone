@@ -57,13 +57,17 @@ class OptionArgumentsSpec extends Specification { def is =
     processAndFindExpected(args, option) must_== Some(OptionArgument(option, Some(value)))
   }
 
-  def detectError(args: String, expectedError: ArgumentError) =
-    processArguments(args).errors must contain(expectedError)
+  def detectError(args: String, expectedError: ArgumentError) = processArguments(args) match {
+    case Errors(errors) => errors must contain(expectedError)
+    case _ => sys.error("Expected an errors result")
+  }
 
-  def processAndFindExpected(args: String, expectedOption: String) =
-    processArguments(args).processedArguments.find(matchesExpected(expectedOption))
+  def processAndFindExpected(args: String, expectedOption: String) = processArguments(args) match {
+    case Result(arguments: List[Argument]) => arguments.find(matchesExpected(expectedOption))
+    case _ => sys.error("Expected a results set")
+  }
 
-  def processArguments(args: String) = new ArgumentsProcessor(buildSpecification).processArguments(args.split(' '))
+  def processArguments(args: String) = new ArgumentsProcessor(buildSpecification).apply(args.split(' '))
 
   def buildSpecification = ArgumentSpecification(
     List(OptionRule("help"), OptionRule("status"), OptionRule("host", true), OptionRule("password", true, ".*"),
