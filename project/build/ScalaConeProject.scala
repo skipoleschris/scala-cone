@@ -3,6 +3,9 @@ import reaktor.scct.ScctProject
 
 class ScalaConeProject(info: ProjectInfo) extends DefaultProject(info) with ScctProject {
 
+  // Options
+  override def compileOptions = List(Unchecked) ++ super.compileOptions
+
   // Additional repositories
   val snapshots = "snapshots" at "http://scala-tools.org/repo-snapshots"
   val releases  = "releases" at "http://scala-tools.org/repo-releases"

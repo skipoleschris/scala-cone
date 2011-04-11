@@ -94,7 +94,7 @@ class FlagArgumentsSpec extends Specification { def is =
   }
 
   def processAndFindExpected(args: String, expectedFlag: Char) = processArguments(args) match {
-    case Result(arguments: List[Argument]) => arguments.find(matchesExpected(expectedFlag))
+    case Result(arguments) => arguments.asInstanceOf[List[Argument]].find(matchesExpected(expectedFlag))
     case _ => sys.error("Expected a results set")
   }
 

@@ -52,7 +52,7 @@ class SimpleArgumentsSpec extends Specification { def is =
 
   def processAndFindExpected(args: String, expectedValue: String, rules: List[SimpleRule]) =
     processArguments(args, rules) match {
-      case Result(arguments: List[Argument]) => arguments.find(matchesExpected(expectedValue))
+      case Result(arguments) => arguments.asInstanceOf[List[Argument]].find(matchesExpected(expectedValue))
       case _ => sys.error("Expected a results set")
     }
 

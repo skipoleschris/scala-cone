@@ -63,7 +63,7 @@ class OptionArgumentsSpec extends Specification { def is =
   }
 
   def processAndFindExpected(args: String, expectedOption: String) = processArguments(args) match {
-    case Result(arguments: List[Argument]) => arguments.find(matchesExpected(expectedOption))
+    case Result(arguments) => arguments.asInstanceOf[List[Argument]].find(matchesExpected(expectedOption))
     case _ => sys.error("Expected a results set")
   }
 
