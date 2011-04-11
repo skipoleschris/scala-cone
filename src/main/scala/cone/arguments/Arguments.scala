@@ -8,7 +8,7 @@ object Arguments {
   def errors(errors: List[ArgumentError]) = new Errors(errors)
 }
 
-abstract class Arguments[+A] {
+sealed abstract class Arguments[+A] {
 
   def result: A
 
