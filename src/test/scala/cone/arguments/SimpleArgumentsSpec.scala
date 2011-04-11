@@ -45,13 +45,19 @@ class SimpleArgumentsSpec extends Specification { def is =
   }
 
   def detectError(args: String, rules: List[SimpleRule], expectedError: ArgumentError) =
-    processArguments(args, rules).errors must contain(expectedError)
+    processArguments(args, rules) match {
+      case Errors(errors) => errors must contain(expectedError)
+      case _ => sys.error("Expected an errors result")
+    }
 
   def processAndFindExpected(args: String, expectedValue: String, rules: List[SimpleRule]) =
-    processArguments(args, rules).processedArguments.find(matchesExpected(expectedValue))
+    processArguments(args, rules) match {
+      case Result(arguments) => arguments.asInstanceOf[List[Argument]].find(matchesExpected(expectedValue))
+      case _ => sys.error("Expected a results set")
+    }
 
   def processArguments(args: String, rules: List[SimpleRule]) =
-    new ArgumentsProcessor(buildSpecification(rules)).processArguments(args.split(' '))
+    new ArgumentsProcessor(buildSpecification(rules)).apply(args.split(' '))
 
   def buildSpecification(rules: List[SimpleRule]) = ArgumentSpecification(List(), List(), rules);
 

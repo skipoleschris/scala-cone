@@ -88,13 +88,17 @@ class FlagArgumentsSpec extends Specification { def is =
     param must_== Some(SimpleArgument(value))
   }
 
-  def detectError(args: String, expectedError: ArgumentError) =
-    processArguments(args).errors must contain(expectedError)
+  def detectError(args: String, expectedError: ArgumentError) = processArguments(args) match {
+    case Errors(errors) => errors must contain(expectedError)
+    case _ => sys.error("Expected an errors result")
+  }
 
-  def processAndFindExpected(args: String, expectedFlag: Char) =
-    processArguments(args).processedArguments.find(matchesExpected(expectedFlag))
+  def processAndFindExpected(args: String, expectedFlag: Char) = processArguments(args) match {
+    case Result(arguments) => arguments.asInstanceOf[List[Argument]].find(matchesExpected(expectedFlag))
+    case _ => sys.error("Expected a results set")
+  }
 
-  def processArguments(args: String) = new ArgumentsProcessor(buildSpecification).processArguments(args.split(' '))
+  def processArguments(args: String) = new ArgumentsProcessor(buildSpecification).apply(args.split(' '))
 
   def buildSpecification = ArgumentSpecification(
     List(),

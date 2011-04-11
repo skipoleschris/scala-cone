@@ -9,9 +9,16 @@ class ArgumentsProcessor(specification: ArgumentSpecification) {
   private lazy val ParameterOptionPattern = """^\-\-([a-zA-Z0-9_\-]+)(=(.*))?$""".r
   private lazy val FlagPattern = """^\-([a-zA-Z0-9]+)$""".r
 
+  import Arguments._
 
-  def processArguments(args: Array[String]) =
-    args.toList.foldLeft(ArgumentAccumulator.create)(processArgument).check(specification.minRequiredArguments)
+  def apply(args: Array[String]) = {
+    val processed = processArguments(args).check(specification.minRequiredArguments)
+    if ( processed.hasErrors ) errors(processed.errors.reverse)
+    else result(processed.processedArguments.reverse)
+  }
+
+  private def processArguments(args: Array[String]) =
+    args.toList.foldLeft(ArgumentAccumulator.create)(processArgument)
 
   private def processArgument(acc: ArgumentAccumulator, arg: String) =
     if ( acc.isExpecting ) processExpectation(acc, arg)
