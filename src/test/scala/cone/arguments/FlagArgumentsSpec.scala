@@ -102,8 +102,10 @@ class FlagArgumentsSpec extends Specification { def is =
 
   def buildSpecification = ArgumentSpecification(
     List(),
-    List(FlagRule('a'), FlagRule('b'), FlagRule('h', List(SimpleRule())), FlagRule('p', List(SimpleRule("[0-9]+"))),
-         FlagRule('t', List(SimpleRule(), SimpleRule(), SimpleRule()))),
+    List(FlagRule('a'), FlagRule('b'),
+         FlagRule('h', Some(ArgumentSpecification(List(), List(), List(SimpleRule())))),
+         FlagRule('p', Some(ArgumentSpecification(List(), List(), List(SimpleRule("[0-9]+"))))),
+         FlagRule('t', Some(ArgumentSpecification(List(), List(), List(SimpleRule(), SimpleRule(), SimpleRule()))))),
     List());
 
   def matchesExpected(expected: Char)(argument: Argument): Boolean = argument match {
