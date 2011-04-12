@@ -5,11 +5,11 @@ package cone.arguments
  */
 trait Argument {
 
-  def +(arg: Argument): Argument = add(arg)
+  def ++(parameters: List[Argument]): Argument = add(parameters)
 
   def isDuplicateOf(arg: Argument): Boolean
 
-  protected def add(arg: Argument): Argument = sys.error("Adding child arguments as parameters is not supported")
+  protected def add(parameters: List[Argument]): Argument = sys.error("Adding child arguments as parameters is not supported")
 }
 
 case class SimpleArgument(value: String) extends Argument {
@@ -37,5 +37,5 @@ case class FlagArgument(flag: Char, parameters: List[Argument] = List()) extends
     case _ => false
   }
 
-  override def add(arg: Argument) = copy(parameters = arg :: parameters)
+  override def add(params: List[Argument]) = copy(parameters = parameters ++ params)
 }
