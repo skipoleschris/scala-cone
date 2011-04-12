@@ -32,10 +32,6 @@ class FlagArgumentsSpec extends Specification { def is =
     "detect the h flag"                                        ! detectFlag("-ha localhost")^
     "record the value 'localhost' for the h flag"              ! recordValue("-ha localhost")^
                                                                endp^
-  "The arguments '-h -a' should"                               ^
-    "detect the h flag"                                        ! detectFlag("-h -a")^
-    "record the value '-a' for the h flag"                     ! recordValue("-h -a")^
-                                                               endp^
   "The arguments '-p 12345' should"                            ^
     "detect the p flag"                                        ! detectFlag("-p 12345")^
     "record the value '12345' for the p flag"                  ! recordValue("-p 12345")^
@@ -44,7 +40,7 @@ class FlagArgumentsSpec extends Specification { def is =
     "report the h flag as an error"                            ! detectError("-h", InsufficientFlagParameters(FlagArgument('h')))^
                                                                endp^
   "The arguments '-hp localhost' should"                       ^
-    "report the p flag as an error"                            ! detectError("-hp localhost", MultipleParameterExpectations(FlagArgument('h')))^
+    "report the p flag as an error"                            ! detectError("-hp localhost", MultipleParameterExpectations(FlagArgument('p')))^
                                                                endp^
   "The arguments '-g' should"                                  ^
     "report the g flag as an error"                            ! detectError("-g", UnknownFlag(FlagArgument('g')))^
@@ -60,6 +56,7 @@ class FlagArgumentsSpec extends Specification { def is =
                                                                endp^
   "The arguments '-p bad' should"                              ^
     "report the p flag as an error"                            ! detectError("-p bad", InvalidFlagParameter(FlagArgument('p')))^
+    "report the bad argument as an error"                            ! detectError("-p bad", NonMatchingArgumentPattern(SimpleArgument("bad"), "[0-9]+"))^
                                                                end
 
   val Detect = """^detect the ([a-zA-Z0-9]) flag""".r
@@ -90,12 +87,12 @@ class FlagArgumentsSpec extends Specification { def is =
 
   def detectError(args: String, expectedError: ArgumentError) = processArguments(args) match {
     case Errors(errors) => errors must contain(expectedError)
-    case _ => sys.error("Expected an errors result")
+    case a => sys.error("Expected an errors result, but got: " + a)
   }
 
   def processAndFindExpected(args: String, expectedFlag: Char) = processArguments(args) match {
     case Result(arguments) => arguments.asInstanceOf[List[Argument]].find(matchesExpected(expectedFlag))
-    case _ => sys.error("Expected a results set")
+    case e => sys.error("Expected a results set, but got: " + e)
   }
 
   def processArguments(args: String) = new ArgumentsProcessor(buildSpecification).apply(args.split(' '))

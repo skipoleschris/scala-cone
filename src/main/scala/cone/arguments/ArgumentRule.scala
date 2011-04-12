@@ -39,6 +39,6 @@ case class SimpleRule(valuePattern: String = ".+",
 case class FlagRule(character: Char, parameterSpecification: Option[ArgumentSpecification] = None) extends ArgumentRule {
   def apply(flag: FlagArgument) = parameterSpecification match {
     case None => Valid(flag)
-    case Some(spec) => Expectation(flag, spec.simpleRules)
+    case Some(spec) => Expectation(flag, spec)
   }
 }

@@ -1,9 +1,11 @@
 package cone.arguments
 
+import annotation.tailrec
+
 /**
  * @author Chris Turner
  */
-class ArgumentsProcessor(specification: ArgumentSpecification) {
+class ArgumentsProcessor(specification: ArgumentSpecification, nested: Boolean = false) {
 
   private lazy val BooleanOptionPattern = """^\-\-([a-zA-Z0-9_\-]+)$""".r
   private lazy val ParameterOptionPattern = """^\-\-([a-zA-Z0-9_\-]+)(=(.*))?$""".r
@@ -12,41 +14,55 @@ class ArgumentsProcessor(specification: ArgumentSpecification) {
   import Arguments._
 
   def apply(args: Array[String]) = {
-    val processed = processArguments(args).check(specification.minRequiredArguments)
+    val processed = processArguments(args.toList).check(specification.minRequiredArguments)
     if ( processed.hasErrors ) errors(processed.errors.reverse)
     else result(processed.processedArguments.reverse)
   }
 
-  private def processArguments(args: Array[String]) =
-    args.toList.foldLeft(ArgumentAccumulator.create)(processArgument)
+  private def processArguments(args: List[String]) = processNextArgument(args, ArgumentAccumulator.create)
 
-  private def processArgument(acc: ArgumentAccumulator, arg: String) =
-    if ( acc.isExpecting ) processExpectation(acc, arg)
-    else processNewArgument(acc, arg)
 
-  private def processNewArgument(acc: ArgumentAccumulator, arg: String) = arg match {
-    case BooleanOptionPattern(name) => applyArgument(OptionArgument.create(name, null), acc)
-    case ParameterOptionPattern(name, _, value) => applyArgument(OptionArgument.create(name, value), acc)
-    case FlagPattern(flags) => flags.foldRight(acc)(processFlag)
-    case _ => applyArgument(SimpleArgument(arg), acc)
-  }
-
-  private def processExpectation(acc: ArgumentAccumulator, arg: String) = acc.expectationsRemaining match {
-    case Nil => sys.error("Unexpected expectation argument processed when none was expected")
+  @tailrec
+  private def processNextArgument(args: List[String], acc: ArgumentAccumulator): ArgumentAccumulator = args match {
+    case Nil => acc
     case x::xs => {
-      x(SimpleArgument(arg)) match {
-        case Valid(param) => acc + param
-        case Error(cause) => acc + InvalidFlagParameter(acc.argumentWithExpectations.get) + cause
-      }
+      val next = processArgument(acc, x, xs)
+      if ( nested && (next.noOfSimpleArguments == specification.simpleRules.size) ) next
+      else processNextArgument(xs.drop(next.argsUsed), next.copy(argsUsed = 0))
     }
   }
 
-  private def processFlag(c: Char, acc: ArgumentAccumulator) = applyArgument(FlagArgument(c), acc)
+  private def processArgument(acc: ArgumentAccumulator, arg: String, remainder: List[String]) = arg match {
+    case BooleanOptionPattern(name) => applyArgument(OptionArgument.create(name, null), remainder, acc)
+    case ParameterOptionPattern(name, _, value) => applyArgument(OptionArgument.create(name, value), remainder, acc)
+    case FlagPattern(flags) => {
+      println("***FLAGS: " + flags)
+      val next = flags.foldLeft(acc)(processFlag(remainder)_)
+      next.flagsProcessed
+    }
+    case _ => applyArgument(SimpleArgument(arg), remainder, acc)
+  }
 
-  private def applyArgument(argument: Argument, acc: ArgumentAccumulator) =
+  private def processFlag(remainder: List[String])(acc: ArgumentAccumulator, c: Char) = {
+    println("Process flag: " + c + " acc is: " + acc)
+    applyArgument(FlagArgument(c), remainder, acc)
+  }
+
+  private def applyArgument(argument: Argument, remainder: List[String], acc: ArgumentAccumulator) =
     specification.applyRuleFor(argument, acc.noOfSimpleArguments) match {
       case Valid(arg) => acc + arg
-      case Expectation(flag, rules) => acc.expecting(flag, rules)
+      case Expectation(flag, spec) => {
+        if ( acc.childrenMerged ) acc + MultipleParameterExpectations(flag)
+        else {
+          val childAccumulator = new ArgumentsProcessor(spec, true).processArguments(remainder)
+          if ( childAccumulator.hasErrors ) acc.mergeErrors(childAccumulator) + InvalidFlagParameter(flag)
+          else {
+             val checkedAcc = childAccumulator.checkNested(flag, spec.simpleRules.size)
+             if ( checkedAcc.hasErrors ) checkedAcc
+             else acc.mergeChildren(flag, childAccumulator)
+          }
+        }
+      }
       case Error(cause) => acc + cause
     }
 }

@@ -5,57 +5,33 @@ package cone.arguments
  */
 case class ArgumentAccumulator(processedArguments: List[Argument],
                                errors: List[ArgumentError],
-                               argumentWithExpectations: Option[Argument],
-                               expectationsRemaining: List[SimpleRule]) {
+                               argsCount: Int = 0,
+                               argsUsed: Int = 0,
+                               childrenMerged: Boolean = false) {
 
-  def +(arg: Argument) =
-    if ( isExpecting ) addExpected(arg)
-    else checkForDuplicateAndApply(arg)(addProcessedArgument)
+  def +(arg: Argument) = checkForDuplicateAndApply(arg)(addProcessedArgument)
 
   private def addProcessedArgument(a: Argument, acc: ArgumentAccumulator) =
-      acc.copy(processedArguments = a :: acc.processedArguments)
+      acc.copy(processedArguments = a :: acc.processedArguments, argsCount = argsCount + 1)
 
-  def +(error: ArgumentError) = copy(errors = error :: errors,
-                                     argumentWithExpectations = None,
-                                     expectationsRemaining = List())
-
-  def expecting(arg: Argument, expectations: List[SimpleRule]) =
-    if ( isExpecting ) copy(errors = MultipleParameterExpectations(arg) :: errors)
-    else copy(argumentWithExpectations = Some(arg), expectationsRemaining = expectations)
-
-  def isExpecting = argumentWithExpectations != None
+  def +(error: ArgumentError) = copy(errors = error :: errors)
 
   def check(expectedArguments: Int) = {
-    if ( isExpecting ) this + InsufficientFlagParameters(argumentWithExpectations.get)
-    else checkRequiredArguments(expectedArguments)
-  }
-
-  private def checkRequiredArguments(expected: Int) = {
     val actual = processedArguments.filter(_.isInstanceOf[SimpleArgument]).size
-    if ( actual < expected ) this + InsufficientArguments(expected, actual)
+    if ( actual < expectedArguments ) this + InsufficientArguments(expectedArguments, actual)
     else this
   }
 
-  private def addExpected(arg: Argument) = expectationsRemaining match {
-    case Nil => sys.error("Unexpected expectation argument processed when none was expected")
-    case x :: xs if ( xs == Nil ) =>
-      checkForDuplicateAndApply(argumentWithExpectations.get + arg)(addCompletedExpectation)
-    case _ => copy(argumentWithExpectations = argumentWithExpectations.map(_ + arg),
-                   expectationsRemaining = expectationsRemaining.tail)
+  def checkNested(argument: Argument, expectedArguments: Int) = {
+    val actual = processedArguments.filter(_.isInstanceOf[SimpleArgument]).size
+    if ( actual < expectedArguments ) this + InsufficientFlagParameters(argument)
+    else this
   }
-
-  private def addCompletedExpectation(a: Argument, acc: ArgumentAccumulator) =
-    acc.copy(processedArguments = a :: acc.processedArguments,
-             argumentWithExpectations = None,
-             expectationsRemaining = List())
-
 
   private def checkForDuplicateAndApply(arg: Argument)(f: (Argument, ArgumentAccumulator) => ArgumentAccumulator) =
     processedArguments.find(isDuplicate(arg)) match {
       case None => f(arg, this)
-      case _ => copy(errors = DuplicateArgument(arg) :: errors,
-                     argumentWithExpectations = None,
-                     expectationsRemaining = List())
+      case _ => copy(errors = DuplicateArgument(arg) :: errors)
     }
 
   private def isDuplicate(arg: Argument)(checkWith: Argument) = arg.isDuplicateOf(checkWith)
@@ -63,9 +39,21 @@ case class ArgumentAccumulator(processedArguments: List[Argument],
   def hasErrors = errors.size > 0
 
   def noOfSimpleArguments = processedArguments.filter(_.isInstanceOf[SimpleArgument]).length
+
+  def mergeErrors(acc: ArgumentAccumulator) = copy(errors = acc.errors ++ errors,
+                                                   argsUsed = acc.argsUsed)
+
+  def mergeChildren(argument: Argument, childAcc: ArgumentAccumulator) =
+    checkForDuplicateAndApply(argument ++ childAcc.processedArguments)(mergeFromChildAccumulator(childAcc))
+
+  def mergeFromChildAccumulator(childAcc: ArgumentAccumulator)(a: Argument, acc: ArgumentAccumulator) =
+    acc.copy(processedArguments = a :: acc.processedArguments,
+             argsUsed = childAcc.argsCount, childrenMerged = true)
+
+  def flagsProcessed = copy(childrenMerged = false)
 }
 
 object ArgumentAccumulator {
 
-  def create = new ArgumentAccumulator(List(), List(), None, List())
+  def create = new ArgumentAccumulator(List(), List(), 0)
 }
