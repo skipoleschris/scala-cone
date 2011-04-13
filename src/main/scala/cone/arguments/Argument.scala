@@ -7,7 +7,7 @@ sealed trait Argument {
   def isDuplicateOf(arg: Argument): Boolean
 }
 
-trait Parameterised {
+private[arguments] trait Parameterised {
   def parameters: List[Argument]
   def +(parameter: Argument): Argument = add(parameter)
   def ++(parameters: List[Argument]): Argument = add(parameters)
@@ -27,7 +27,7 @@ case class OptionArgument(name: String, value: Option[String]) extends Argument 
   }
 }
 
-object OptionArgument {
+private[arguments] object OptionArgument {
   def create(name: String, value: String) = OptionArgument(name, Option(value))
 }
 

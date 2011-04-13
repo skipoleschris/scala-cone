@@ -7,7 +7,7 @@ case class ArgumentSpecification(optionRules: List[OptionRule],
                                  flagRules: List[FlagRule],
                                  simpleRules: List[SimpleRule] = List()) {
 
-  def minRequiredArguments = simpleRules.filter(_.mandatory).size
+  def minRequiredArguments = simpleRules.size
 
   def applyRuleFor[T <: Argument](argument: T, simpleArgumentIndex: Int) = argument match {
     case option: OptionArgument => applyOptionRule(option)
