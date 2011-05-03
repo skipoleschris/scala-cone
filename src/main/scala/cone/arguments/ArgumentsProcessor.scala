@@ -5,7 +5,7 @@ import annotation.tailrec
 /**
  * @author Chris Turner
  */
-class ArgumentsProcessor(specification: ArgumentSpecification, nested: Boolean = false) {
+class ArgumentsProcessor(specification: ArgumentSpecification, forArgument: Option[Argument] = None) {
 
   private lazy val BooleanOptionPattern = """^\-\-([a-zA-Z0-9_\-]+)$""".r
   private lazy val ParameterOptionPattern = """^\-\-([a-zA-Z0-9_\-]+)(=(.*))?$""".r
@@ -27,26 +27,25 @@ class ArgumentsProcessor(specification: ArgumentSpecification, nested: Boolean =
     case Nil => acc
     case x::xs => {
       val next = processArgument(acc, x, xs)
-      if ( nested && (next.noOfSimpleArguments == specification.simpleRules.size) ) next
+      if ( isNested && (next.noOfSimpleArguments == specification.simpleRules.size) ) next
       else processNextArgument(xs.drop(next.argsUsed), next.copy(argsUsed = 0))
     }
   }
+
+  private def isNested = forArgument != None
 
   private def processArgument(acc: ArgumentAccumulator, arg: String, remainder: List[String]) = arg match {
     case BooleanOptionPattern(name) => applyArgument(OptionArgument.create(name, null), remainder, acc)
     case ParameterOptionPattern(name, _, value) => applyArgument(OptionArgument.create(name, value), remainder, acc)
     case FlagPattern(flags) => {
-      println("***FLAGS: " + flags)
       val next = flags.foldLeft(acc)(processFlag(remainder)_)
       next.flagsProcessed
     }
     case _ => applyArgument(SimpleArgument(arg), remainder, acc)
   }
 
-  private def processFlag(remainder: List[String])(acc: ArgumentAccumulator, c: Char) = {
-    println("Process flag: " + c + " acc is: " + acc)
+  private def processFlag(remainder: List[String])(acc: ArgumentAccumulator, c: Char) =
     applyArgument(FlagArgument(c), remainder, acc)
-  }
 
   private def applyArgument(argument: Argument, remainder: List[String], acc: ArgumentAccumulator) =
     specification.applyRuleFor(argument, acc.noOfSimpleArguments) match {
@@ -54,7 +53,7 @@ class ArgumentsProcessor(specification: ArgumentSpecification, nested: Boolean =
       case Expectation(flag, spec) => {
         if ( acc.childrenMerged ) acc + MultipleParameterExpectations(flag)
         else {
-          val childAccumulator = new ArgumentsProcessor(spec, true).processArguments(remainder)
+          val childAccumulator = new ArgumentsProcessor(spec, Some(argument)).processArguments(remainder)
           if ( childAccumulator.hasErrors ) acc.mergeErrors(childAccumulator) + InvalidFlagParameter(flag)
           else {
              val checkedAcc = childAccumulator.checkNested(flag, spec.simpleRules.size)
