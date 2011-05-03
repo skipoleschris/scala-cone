@@ -22,7 +22,7 @@ case class ArgumentAccumulator(processedArguments: List[Argument],
     else this
   }
 
-  def checkNested(argument: Argument, expectedArguments: Int) = {
+  def checkNested(argument: Parameterised, expectedArguments: Int) = {
     val actual = processedArguments.filter(_.isInstanceOf[SimpleArgument]).size
     if ( actual < expectedArguments ) this + InsufficientFlagParameters(argument)
     else this
@@ -43,7 +43,7 @@ case class ArgumentAccumulator(processedArguments: List[Argument],
   def mergeErrors(acc: ArgumentAccumulator) = copy(errors = acc.errors ++ errors,
                                                    argsUsed = acc.argsUsed)
 
-  def mergeChildren(argument: Argument, childAcc: ArgumentAccumulator) =
+  def mergeChildren(argument: Parameterised, childAcc: ArgumentAccumulator) =
     checkForDuplicateAndApply(argument ++ childAcc.processedArguments)(mergeFromChildAccumulator(childAcc))
 
   def mergeFromChildAccumulator(childAcc: ArgumentAccumulator)(a: Argument, acc: ArgumentAccumulator) =
