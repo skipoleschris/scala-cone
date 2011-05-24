@@ -4,7 +4,7 @@
     <facet type="scala" name="Scala">
       <configuration>
         <option name="compilerLibraryLevel" value="Project" />
-        <option name="compilerLibraryName" value="Scala 2.9.0.RC2" />
+        <option name="compilerLibraryName" value="Scala 2.9.0" />
         <option name="deprecationWarnings" value="true" />
         <option name="explainTypeErrors" value="true" />
         <option name="uncheckedWarnings" value="true" />
@@ -31,25 +31,25 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Scala 2.9.0.RC2" level="project" />
+    <orderEntry type="library" name="Scala 2.9.0" level="project" />
     <orderEntry type="module-library" exported="">
       <library name="Compile">
         <CLASSES>
-          <root url="file://$MODULE_DIR$/lib_managed/scala_2.9.0.RC2/compile" />
+          <root url="file://$MODULE_DIR$/lib_managed/scala_2.9.0/compile" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/lib_managed/scala_2.9.0.RC2/compile" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/lib_managed/scala_2.9.0/compile" recursive="false" />
       </library>
     </orderEntry>
     <orderEntry type="module-library" scope="TEST">
       <library name="Test">
         <CLASSES>
-          <root url="file://$MODULE_DIR$/lib_managed/scala_2.9.0.RC2/test" />
+          <root url="file://$MODULE_DIR$/lib_managed/scala_2.9.0/test" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/lib_managed/scala_2.9.0.RC2/test" recursive="false" />
+        <jarDirectory url="file://$MODULE_DIR$/lib_managed/scala_2.9.0/test" recursive="false" />
       </library>
     </orderEntry>
   </component>
